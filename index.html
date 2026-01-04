@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Cannon Game</title>
-
-  <!-- LINK CSS (THIS IS IMPORTANT) -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -77,15 +75,6 @@ function spawnTarget() {
     target = null;
     return;
   }
-function startGame() {
-  gameState = "playing";
-  score = 0;
-  round = 1;
-  ammoUsed = 0;
-  bullets = [];
-}
-
-  
 
   const diff = document.getElementById("difficulty").value;
 
@@ -100,7 +89,7 @@ function startGame() {
   };
 }
 
-/* ================== START ================== */
+/* ================== START GAME ================== */
 function startGame() {
   bullets = [];
   score = 0;
@@ -123,6 +112,11 @@ document.addEventListener("keydown", e => {
   if (gameState !== "playing") {
     if (e.key === "r") startGame();
     return;
+  }
+
+  // Prevent scrolling
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+    e.preventDefault();
   }
 
   if (e.key === "ArrowUp") cannon.angle = Math.min(90, cannon.angle + 5);
