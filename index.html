@@ -1,63 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Cannon Game</title>
-  <style>
-    body {
-      background: #111;
-      color: white;
-      font-family: Arial;
-      text-align: center;
-    }
-    canvas {
-      border: 2px solid white;
-      background: black;
-    }
-    .panel {
-      margin: 10px;
-    }
-  </style>
-</head>
-<body>
+body {
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
 
-<h1>Cannon Game</h1>
+canvas {
+  background: black;
+  border: 2px solid white;
+  display: block;
+  margin: 0 auto;
+}
 
-<div class="panel">
-  Difficulty:
-  <select id="difficulty">
-    <option value="N">Normal</option>
-    <option value="E">Easy</option>
-    <option value="M">Medium</option>
-    <option value="H">Hard</option>
-  </select>
+.panel {
+  margin: 10px;
+}
 
-  Gravity Speed:
-  <input id="gravitySpeed" type="number" step="0.1" value="0.3">
-
-  Bounce Walls:
-  <input id="bounceWalls" type="checkbox">
-
-  <button onclick="startGame()">Start / Restart</button>
-</div>
-
-<p>
-Controls:<br>
-⬆ / ⬇ Aim<br>
-⬅ / ➡ Speed<br>
-SPACE Shoot<br>
-G Toggle Gravity<br>
-R Restart
-</p>
-
-<canvas id="game" width="800" height="600"></canvas>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-let bullets = [];
-let target = {};
-let gravityOn = false;
-let gravitySpeed = 0.3;
-l
+.controls {
+  font-size: 14px;
+  opacity: 0.85;
+}
