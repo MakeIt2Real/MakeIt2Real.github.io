@@ -77,6 +77,15 @@ function spawnTarget() {
     target = null;
     return;
   }
+function startGame() {
+  gameState = "playing";
+  score = 0;
+  round = 1;
+  ammoUsed = 0;
+  bullets = [];
+}
+
+  
 
   const diff = document.getElementById("difficulty").value;
 
