@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Cannon Game</title>
-<style>
-  body {
-    background: black;
-    color: white;
-    font-family: Arial;
-    text-align: center;
-  }
-  canvas {
-    background: #111;
-    display: block;
-    margin: 10px auto;
-    border: 2px solid white;
-  }
-  .panel {
-    margin: 10px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Cannon Game</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+    canvas {
+      border: 2px solid white;
+      background: black;
+    }
+    .panel {
+      margin: 10px;
+    }
+  </style>
 </head>
 <body>
 
@@ -40,16 +38,16 @@
   Bounce Walls:
   <input id="bounceWalls" type="checkbox">
 
-  <button onclick="startGame()">Start Game</button>
+  <button onclick="startGame()">Start / Restart</button>
 </div>
 
 <p>
-<b>Controls:</b><br>
-⬆ / ⬇ → Aim<br>
-⬅ / ➡ → Bullet speed<br>
-SPACE → Shoot<br>
-G → Toggle gravity<br>
-B → Toggle bounce
+Controls:<br>
+⬆ / ⬇ Aim<br>
+⬅ / ➡ Speed<br>
+SPACE Shoot<br>
+G Toggle Gravity<br>
+R Restart
 </p>
 
 <canvas id="game" width="800" height="600"></canvas>
@@ -59,130 +57,7 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let bullets = [];
-let running = false;
-
-let cannon = {
-  x: 40,
-  y: 580,
-  angle: 45,
-  speed: 8
-};
-
+let target = {};
 let gravityOn = false;
 let gravitySpeed = 0.3;
-let bounce = false;
-
-let target = { x: 400, y: 500, size: 15 };
-
-function startGame() {
-  bullets = [];
-  running = true;
-
-  gravitySpeed = parseFloat(document.getElementById("gravitySpeed").value);
-  bounce = document.getElementById("bounceWalls").checked;
-
-  spawnTarget();
-}
-
-function spawnTarget() {
-  const diff = document.getElementById("difficulty").value;
-
-  target.x = Math.random() * 600 + 100;
-
-  if (diff === "E" || diff === "N") target.y = 550;
-  if (diff === "M") target.y = Math.random() * 300 + 250;
-  if (diff === "H") target.y = Math.random() * 550;
-
-  target.size = diff === "H" ? Math.random() * 15 + 5 : 15;
-}
-
-document.addEventListener("keydown", e => {
-  if (!running) return;
-
-  if (e.key === "ArrowUp") cannon.angle = Math.min(90, cannon.angle + 5);
-  if (e.key === "ArrowDown") cannon.angle = Math.max(0, cannon.angle - 5);
-  if (e.key === "ArrowLeft") cannon.speed--;
-  if (e.key === "ArrowRight") cannon.speed++;
-
-  if (e.key === "g") gravityOn = !gravityOn;
-  if (e.key === "b") bounce = !bounce;
-
-  if (e.code === "Space") {
-    bullets.push({
-      x: cannon.x,
-      y: cannon.y,
-      vx: cannon.speed * Math.cos(cannon.angle * Math.PI / 180),
-      vy: -cannon.speed * Math.sin(cannon.angle * Math.PI / 180),
-      r: 5
-    });
-  }
-});
-
-function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (!running) return requestAnimationFrame(update);
-
-  bullets.forEach((b, i) => {
-    if (gravityOn) b.vy += gravitySpeed;
-    b.x += b.vx;
-    b.y += b.vy;
-
-    if (bounce) {
-      if (b.x < 0 || b.x > 800) b.vx *= -0.7;
-      if (b.y > 580) b.vy *= -0.7;
-    }
-
-    // hit target
-    if (
-      b.x > target.x &&
-      b.x < target.x + target.size &&
-      b.y > target.y &&
-      b.y < target.y + target.size
-    ) {
-      bullets.splice(i, 1);
-      spawnTarget();
-    }
-  });
-
-  draw();
-  requestAnimationFrame(update);
-}
-
-function draw() {
-  // target
-  ctx.fillStyle = "green";
-  ctx.fillRect(target.x, target.y, target.size, target.size);
-
-  // cannon
-  ctx.fillStyle = "purple";
-  ctx.fillRect(cannon.x - 5, cannon.y, 10, 15);
-
-  // aim line
-  ctx.strokeStyle = "red";
-  ctx.beginPath();
-  ctx.moveTo(cannon.x, cannon.y);
-  ctx.lineTo(
-    cannon.x + 30 * Math.cos(cannon.angle * Math.PI / 180),
-    cannon.y - 30 * Math.sin(cannon.angle * Math.PI / 180)
-  );
-  ctx.stroke();
-
-  // bullets
-  ctx.fillStyle = "white";
-  bullets.forEach(b => {
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  // UI text
-  ctx.fillText("Gravity: " + (gravityOn ? "ON" : "OFF"), 10, 20);
-  ctx.fillText("Bounce: " + (bounce ? "ON" : "OFF"), 10, 40);
-}
-
-update();
-</script>
-
-</body>
-</html>
+l
