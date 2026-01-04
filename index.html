@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cannon Game Full Port</title>
+<style>
+  body { background: black; color: white; text-align: center; font-family: Arial; }
+  canvas { background: #111; display: block; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<h1>🎯 Cannon Physics Game (Full Port)</h1>
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+<p id="status"></p>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// --- Game Variables ---
+let bullets = [];
+let cannon = { x: 40, y: 580, angle: 45, speed: 8 };
+let gravityOn = false;
+let gravitySpeed = 0.3;
+let bounce = false;
+let bounceCheck = false;
+let challenge = true; // always challenge mode
+let difficulty = "N"; // N, E, M, H
+
+let score = 0;
+let round = 1;
+let goal = 1;
+let ammo = 20;
+let ammoUsed = ammo;
+
+let target = { x: 0, y: 0, size: 10 };
+
+// --- Helper Functions ---
+function circleRectCollision(cx, cy, radius, rx, ry, rw, rh){
+  let closestX = Math.max(rx, Math.min(cx, rx+rw));
+  let closestY = Math.max(ry, Math.min(cy, ry+rh));
+  let dx = cx - closestX;
+  let dy = cy - closestY;
+  return (dx*dx + dy*dy) <= (radius*radius);
+}
+
+// Generate target based on difficulty
+function randomTarget(){
+  if(difficulty === "N" || difficulty === "E"){
+    target.x = Math.random() * 400 + 100;
+    target.y = 575;
+  } else if(difficulty === "M"){
+    target.x = Math.random() * 400 + 100;
+    target.y = Math.random() * 275 + 300;
+  } else if(difficulty === "H"){
+    target.x = Math.random() * 400 + 100;
+    target.y = Math.random() * 575;
+  }
+  if(difficulty === "N" || difficulty === "E") target.size = 10;
+  if(difficulty === "M") target.size = Math.random() * 12 + 8;
+  if(difficulty === "H") target.size = Math.random() * 17 + 3;
+}
+
+// --- Event Listeners ---
+document.addEventListener("keydown", e=>{
+  switch(e.key){
+    case " ": // shoot
+      if(ammoUsed <=0) return;
+      let vx = cannon.speed * Math.cos(cannon.angle*Math.PI/180);
+      let vy = -cannon.speed * Math.sin(cannon.angle*Math.PI/180);
+      bullets.push({ x: cannon.x+5, y: cannon.y, vx, vy, radius:5 });
+      ammoUsed--;
+      break;
+    case "ArrowUp": cannon.angle = Math.min(cannon.angle+5,90); break;
+    case "ArrowDown": cannon.angle = Math.max(cannon.angle-5,0); break;
+    case "ArrowLeft": cannon.speed = Math.max(cannon.speed-1,1); break;
+    case "ArrowRight": cannon.speed+=1; break;
+    case "g": gravityOn = !gravityOn; break;
+    case "b": bounce = !bounce; break;
+  }
+});
+
+// --- Game Loop ---
+function loop(){
+  ctx.clearRect(0,0,800,600);
+
+  // --- Draw cannon ---
+  ctx.fillStyle="blue";
+  ctx.fillRect(cannon.x, cannon.y, 10, 15);
+  let endX = cannon.x+5 + 20*Math.cos(cannon.angle*Math.PI/180);
+  let endY = cannon.y - 20*Math.sin(cannon.angle*Math.PI/180);
+  ctx.strokeStyle="red"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(cannon.x+5,cannon.y); ctx.lineTo(endX,endY); ctx.stroke();
+
+  // --- Draw target ---
+  ctx.fillStyle="lime";
+  ctx.fillRect(target.x,target.y,target.size,target.size);
+
+  // --- Update bullets ---
+  for(let i=bullets.length-1;i>=0;i--){
+    let b = bullets[i];
+    if(gravityOn) b.vy += gravitySpeed;
+    b.x += b.vx;
+    b.y += b.vy;
+
+    // Bounce
+    if(bounce){
+      if(b.y>580){ b.y=580; b.vy=-b.vy*0.7; if(Math.abs(b.vy)<1) bullets.splice(i,1);}
+      if(bounceCheck){
+        if(b.x>780){ b.x=780; b.vx=-b.vx*0.7; if(Math.abs(b.vx)<1) bullets.splice(i,1);}
+        if(b.x<20){ b.x=20; b.vx=-b.vx*0.7; if(Math.abs(b.vx)<1) bullets.splice(i,1);}
+      }
+    } else {
+      if(b.y>590 || b.y<0 || b.x>790 || b.x<0){ bullets.splice(i,1); }
+    }
+
+    // Collision with target
+    if(circleRectCollision(b.x,b.y,b.radius,target.x,target.y,target.size,target.size)){
+      if(target.size<=8) score+=3;
+      else if(target.size<=14) score+=2;
+      else score+=1;
+      bullets.splice(i,1);
+      randomTarget();
+    }
+
+    // Draw bullet
+    ctx.fillStyle="white";
+    ctx.beginPath(); ctx.arc(b.x,b.y,b.radius,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  // --- Update rounds & goal ---
+  if(score>=goal){
+    score -= goal;
+    goal += 2;
+    round +=1;
+    ammo -=2;
+    ammoUsed = ammo;
+  }
+
+  // --- Check lose/win ---
+  if(ammoUsed<0){ alert("You lost!"); return; }
+  if(round>=6){ alert("You win!"); return; }
+
+  // --- Draw status ---
+  document.getElementById("status").innerHTML=
+    `Score: ${score} | Round: ${round} | Ammo: ${ammoUsed} | Goal: ${goal} | Bullet Speed: ${cannon.speed} | Angle: ${cannon.angle} | Gravity: ${gravityOn?"ON":"OFF"} | Bounce: ${bounce?"ON":"OFF"}`;
+
+  requestAnimationFrame(loop);
+}
+
+// --- Start game ---
+randomTarget();
+loop();
+
+</script>
+</body>
+</html>
