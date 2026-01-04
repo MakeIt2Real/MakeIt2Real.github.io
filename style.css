@@ -1,20 +1,22 @@
 body {
-  background: #0f0f0f;
+  background: #111;
   color: white;
   font-family: Arial, sans-serif;
   text-align: center;
-  padding: 20px;
 }
 
-button {
-  padding: 12px 20px;
-  font-size: 16px;
-  cursor: pointer;
+canvas {
+  background: black;
+  border: 2px solid white;
+  display: block;
+  margin: 0 auto;
 }
 
-pre {
-  background: #1e1e1e;
-  padding: 10px;
-  display: inline-block;
-  text-align: left;
+.panel {
+  margin: 10px;
+}
+
+.controls {
+  font-size: 14px;
+  opacity: 0.85;
 }
