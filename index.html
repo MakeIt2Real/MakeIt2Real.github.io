@@ -9,15 +9,20 @@
       background: black;
       color: white;
       font-family: Arial, sans-serif;
+      text-align: center;
     }
     canvas {
       display: block;
-      margin: auto;
+      margin: 20px auto;
       background: black;
+      border: 2px solid white;
     }
   </style>
 </head>
 <body>
+
+<h1>Wack-A-Mole</h1>
+<p>Press keys 1–9 to whack the mole</p>
 
 <canvas id="game" width="800" height="600"></canvas>
 
@@ -27,30 +32,30 @@ const ctx = canvas.getContext("2d");
 
 // --- VARIABLES ---
 let running = true;
-let Wack_Hit = -1;
-let Wack_timer = 0;
-let WackMole = 0;
+let wackHit = -1;
+let wackTimer = 0;
+let wackMole = 0;
 let score = 0;
 let timer = 0;
 
-// --- MOLE COORDS ---
-let WackMole_Coords = [];
-let startX = 100;
-let startY = 100;
+// --- MOLE COORDINATES ---
+const moleCoords = [];
+let x = 100;
+let y = 100;
 
-for (let d = 0; d < 3; d++) {
-  for (let i = 0; i < 3; i++) {
-    WackMole_Coords.push([startX, startY]);
-    startX += 100;
+for (let row = 0; row < 3; row++) {
+  for (let col = 0; col < 3; col++) {
+    moleCoords.push([x, y]);
+    x += 100;
   }
-  startY += 100;
-  startX = 100;
+  y += 100;
+  x = 100;
 }
 
 // --- INPUT ---
 document.addEventListener("keydown", (e) => {
   if (e.key >= "1" && e.key <= "9") {
-    Wack_Hit = parseInt(e.key) - 1;
+    wackHit = parseInt(e.key) - 1;
   }
 });
 
@@ -59,21 +64,20 @@ function gameLoop() {
   if (!running) return;
 
   timer++;
-  Wack_timer++;
+  wackTimer++;
 
-  if (Wack_timer === 80) {
-    WackMole = Math.floor(Math.random() * 9);
+  if (wackTimer === 80) {
+    wackMole = Math.floor(Math.random() * 9);
   }
 
-  if (Wack_Hit === WackMole) {
+  if (wackHit === wackMole) {
     score++;
-    console.log(score);
-    Wack_Hit = -1;
-    Wack_timer = 79;
+    wackHit = -1;
+    wackTimer = 79;
   }
 
-  if (Wack_timer === 80) {
-    Wack_timer = 0;
+  if (wackTimer === 80) {
+    wackTimer = 0;
   }
 
   // --- DRAW ---
@@ -85,42 +89,43 @@ function gameLoop() {
   ctx.fillText("SCORE: " + score, 20, 40);
 
   // GRID
-  let x = 100;
-  let y = 100;
+  let gx = 100;
+  let gy = 100;
   let keyNum = 1;
 
   ctx.font = "20px Arial";
 
-  for (let d = 0; d < 3; d++) {
-    for (let i = 0; i < 3; i++) {
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
       ctx.strokeStyle = "white";
-      ctx.strokeRect(x, y, 80, 80);
+      ctx.strokeRect(gx, gy, 80, 80);
 
       ctx.fillStyle = "white";
-      ctx.fillText(keyNum, x + 35, y + 50);
+      ctx.fillText(keyNum, gx + 35, gy + 50);
 
       keyNum++;
-      x += 100;
+      gx += 100;
     }
-    y += 100;
-    x = 100;
+    gy += 100;
+    gx = 100;
   }
 
   // MOLE
-  let mole = WackMole_Coords[WackMole];
+  const mole = moleCoords[wackMole];
   ctx.fillStyle = "gray";
   ctx.fillRect(mole[0], mole[1], 80, 80);
 
+  // WIN CONDITION
   if (score >= 50) {
     running = false;
-    alert(`YOU HAVE GOTTEN 50 points in ${(timer / 60).toFixed(2)} seconds!`);
+    alert(`YOU GOT 50 POINTS IN ${(timer / 60).toFixed(2)} SECONDS!`);
     return;
   }
 
   requestAnimationFrame(gameLoop);
 }
 
-// START
+// START GAME
 gameLoop();
 </script>
 
