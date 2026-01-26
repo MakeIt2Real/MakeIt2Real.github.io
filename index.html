@@ -2,253 +2,126 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cannon Game</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Wack-A-Mole</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: black;
+    }
+  </style>
 </head>
 <body>
-
-<h1>Cannon Game</h1>
-
-<div class="panel">
-  Difficulty:
-  <select id="difficulty">
-    <option value="N">Normal</option>
-    <option value="E">Easy</option>
-    <option value="M">Medium</option>
-    <option value="H">Hard</option>
-  </select>
-
-  Gravity Speed:
-  <input id="gravitySpeed" type="number" step="0.1" value="0.3">
-
-  Bounce Walls:
-  <input id="bounceWalls" type="checkbox">
-
-  Enable Target:
-  <input id="enableTarget" type="checkbox" checked>
-
-  <button onclick="startGame()">Start / Restart</button>
-</div>
-
-<p class="controls">
-Controls:<br>
-⬆ / ⬇ Aim<br>
-⬅ / ➡ Speed<br>
-SPACE Shoot<br>
-G Toggle Gravity<br>
-R Restart
-</p>
 
 <canvas id="game" width="800" height="600"></canvas>
 
 <script>
-/* ================== SETUP ================== */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let bullets = [];
-let target = null;
-let enableTarget = true;
-
-let gravityOn = false;
-let gravitySpeed = 0.3;
-let bounce = false;
-
+// --- VARIABLES ---
+let running = true;
+let Wack_Hit = -1;
+let Wack_timer = 0;
+let WackMole = 0;
 let score = 0;
-let round = 1;
-let goal = 3;
-let ammo = 20;
-let ammoUsed = 20;
+let timer = 0;
 
-let gameState = "menu";
+// --- MOLE COORDS ---
+let WackMole_Coords = [];
+let startX = 100;
+let startY = 100;
 
-const cannon = {
-  x: 40,
-  y: 580,
-  angle: 45,
-  speed: 8
-};
-
-/* ================== TARGET ================== */
-function spawnTarget() {
-  const diff = document.getElementById("difficulty").value;
-
-  if (diff === "N" || !enableTarget) {
-    target = null;
-    return;
+for (let d = 0; d < 3; d++) {
+  for (let i = 0; i < 3; i++) {
+    WackMole_Coords.push([startX, startY]);
+    startX += 100;
   }
-
-  let size = 10;
-  if (diff === "M") size = Math.random() * 12 + 8;
-  if (diff === "H") size = Math.random() * 17 + 3;
-
-  target = {
-    x: Math.random() * 500 + 200,
-    y: diff === "H" ? Math.random() * 400 : 550,
-    size: size
-  };
+  startY += 100;
+  startX = 100;
 }
 
-/* ================== START GAME ================== */
-function startGame() {
-  bullets = [];
-  score = 0;
-  round = 1;
-  goal = 3;
-  ammo = 20;
-  ammoUsed = ammo;
-
-  gravityOn = false;
-  gravitySpeed = parseFloat(document.getElementById("gravitySpeed").value);
-  bounce = document.getElementById("bounceWalls").checked;
-  enableTarget = document.getElementById("enableTarget").checked;
-
-  gameState = "playing";
-  spawnTarget();
-}
-
-/* ================== INPUT ================== */
-window.addEventListener("keydown", e => {
-  // Prevent scrolling
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
-    e.preventDefault();
-  }
-
-  if (gameState !== "playing") {
-    if (e.key === "r") startGame();
-    return;
-  }
-
-  if (e.key === "ArrowUp") cannon.angle = Math.min(90, cannon.angle + 5);
-  if (e.key === "ArrowDown") cannon.angle = Math.max(0, cannon.angle - 5);
-  if (e.key === "ArrowLeft") cannon.speed--;
-  if (e.key === "ArrowRight") cannon.speed++;
-  if (e.key === "g") gravityOn = !gravityOn;
-
-  if (e.code === "Space" && ammoUsed > 0) {
-    bullets.push({
-      x: cannon.x,
-      y: cannon.y,
-      vx: cannon.speed * Math.cos(cannon.angle * Math.PI / 180),
-      vy: -cannon.speed * Math.sin(cannon.angle * Math.PI / 180),
-      r: 5
-    });
-    ammoUsed--;
+// --- INPUT ---
+document.addEventListener("keydown", (e) => {
+  if (e.key >= "1" && e.key <= "9") {
+    Wack_Hit = parseInt(e.key) - 1;
   }
 });
 
-/* ================== UPDATE ================== */
-function update() {
-  if (gameState !== "playing") return;
+// --- GAME LOOP ---
+function gameLoop() {
+  if (!running) return;
 
-  for (let b of bullets) {
-    if (gravityOn) b.vy += gravitySpeed;
-    b.x += b.vx;
-    b.y += b.vy;
+  timer++;
+  Wack_timer++;
 
-    if (bounce) {
-      if (b.y > 580) b.vy *= -0.7;
-      if (b.x < 10 || b.x > 790) b.vx *= -0.7;
-    }
+  if (Wack_timer === 80) {
+    WackMole = Math.floor(Math.random() * 9);
   }
 
-  bullets = bullets.filter(b => b.y < 600 && b.x > 0 && b.x < 800);
-
-  if (target) {
-    for (let b of bullets) {
-      if (
-        b.x > target.x &&
-        b.x < target.x + target.size &&
-        b.y > target.y &&
-        b.y < target.y + target.size
-      ) {
-        score++;
-        spawnTarget();
-      }
-    }
+  if (Wack_Hit === WackMole) {
+    score++;
+    console.log(score);
+    Wack_Hit = -1;
+    Wack_timer = 79;
   }
 
-  if (ammoUsed <= 0 && score < goal && enableTarget) {
-    gameState = "lose";
+  if (Wack_timer === 80) {
+    Wack_timer = 0;
   }
 
-  if (score >= goal && enableTarget) {
-    score -= goal;
-    round++;
-    goal += 2;
-    ammo += 2;
-    ammoUsed = ammo;
+  // --- DRAW ---
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (round > 5) gameState = "win";
-  }
-}
-
-/* ================== DRAW ================== */
-function draw() {
-  ctx.clearRect(0, 0, 800, 600);
-
-  if (target) {
-    ctx.fillStyle = "green";
-    ctx.fillRect(target.x, target.y, target.size, target.size);
-  }
-
-  ctx.fillStyle = "purple";
-  ctx.fillRect(cannon.x - 5, cannon.y, 10, 15);
-
-  ctx.strokeStyle = "red";
-  ctx.beginPath();
-  ctx.moveTo(cannon.x, cannon.y);
-  ctx.lineTo(
-    cannon.x + 30 * Math.cos(cannon.angle * Math.PI / 180),
-    cannon.y - 30 * Math.sin(cannon.angle * Math.PI / 180)
-  );
-  ctx.stroke();
-
+  // SCORE
   ctx.fillStyle = "white";
-  for (let b of bullets) {
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-    ctx.fill();
+  ctx.font = "36px Arial";
+  ctx.fillText("SCORE: " + score, 20, 40);
+
+  // GRID
+  let x = 100;
+  let y = 100;
+  let keyNum = 1;
+
+  ctx.font = "20px Arial";
+
+  for (let d = 0; d < 3; d++) {
+    for (let i = 0; i < 3; i++) {
+      ctx.strokeStyle = "white";
+      ctx.strokeRect(x, y, 80, 80);
+
+      ctx.fillStyle = "white";
+      ctx.fillText(keyNum, x + 35, y + 50);
+
+      keyNum++;
+      x += 100;
+    }
+    y += 100;
+    x = 100;
   }
 
-  ctx.fillText(`Score: ${score}`, 10, 20);
-  ctx.fillText(`Round: ${round}`, 10, 40);
-  ctx.fillText(`Ammo: ${ammoUsed}`, 10, 60);
+  // MOLE
+  let mole = WackMole_Coords[WackMole];
+  ctx.fillStyle = "gray";
+  ctx.fillRect(mole[0], mole[1], 80, 80);
 
-  if (gameState === "win" || gameState === "lose") {
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
-    ctx.fillRect(0, 0, 800, 600);
-    ctx.fillStyle = "white";
-    ctx.font = "40px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(gameState === "win" ? "YOU WIN!" : "YOU LOSE!", 400, 300);
-    ctx.font = "20px Arial";
-    ctx.fillText("Press R or Restart", 400, 340);
-    ctx.textAlign = "left";
+  if (score >= 50) {
+    running = false;
+    alert(`YOU HAVE GOTTEN 50 points in ${(timer / 60).toFixed(2)} seconds!`);
+    return;
   }
+
+  requestAnimationFrame(gameLoop);
 }
 
-/* ================== LOOP ================== */
-function loop() {
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-loop();
-
-/* ================== AUTO DISABLE TARGET IN NORMAL MODE ================== */
-const difficultySelect = document.getElementById("difficulty");
-const enableTargetCheckbox = document.getElementById("enableTarget");
-
-difficultySelect.addEventListener("change", () => {
-  if (difficultySelect.value === "N") {
-    enableTargetCheckbox.checked = false;
-    enableTargetCheckbox.disabled = true;
-  } else {
-    enableTargetCheckbox.disabled = false;
-  }
-});
+// START
+gameLoop();
 </script>
 
 </body>
